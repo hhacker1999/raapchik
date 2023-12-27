@@ -13,3 +13,58 @@
 `
 go get -u github.com/hhacker1999/raapchik
 `
+
+## Example usage
+
+```go
+package main
+
+import (
+	"fmt"
+	"net/http"
+
+	"github.com/hhacker1999/raapchik"
+)
+
+func main() {
+	port := 9000
+	r := raapchik.New()
+	r.Get("/", basicHandler)
+	r.Get("/url/{{id}}/param", urlParamHandler)
+	r.Get("/foo/{{id}}/bar/{{cid}}/baz", fooHandler)
+	r.Group(func(r *raapchik.Raapchik) {
+		r.Use(AuthMiddleware)
+		r.Get("/user/info", userHandler)
+	})
+	http.ListenAndServe(fmt.Sprintf(":%d", port), r)
+}
+
+func AuthMiddleware(w http.ResponseWriter, r *http.Request) bool {
+	authenticated := false
+	if !authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte("Not allowed"))
+		return true
+	}
+	return false
+}
+
+func urlParamHandler(w http.ResponseWriter, r *http.Request) {
+	id := raapchik.GetPathParam(r, "id")
+	w.Write([]byte("Id received " + id))
+}
+
+func fooHandler(w http.ResponseWriter, r *http.Request) {
+	id := raapchik.GetPathParam(r, "id")
+	cid := raapchik.GetPathParam(r, "cid")
+	w.Write([]byte("Ids received " + id + " " + cid))
+}
+
+func userHandler(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Hello from user"))
+}
+
+func basicHandler(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Hello, Raapchik!"))
+}
+```
