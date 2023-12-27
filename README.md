@@ -10,6 +10,6 @@
 
 ## Installation
 
-`bash
+`
 go get -u github.com/hhacker1999/raapchik
 `
